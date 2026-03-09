@@ -1,0 +1,7 @@
+Django>=3.2
+whitenoise>=6.0.0
+djangorestframework
+drf-spectacular
+dj-database-url
+psycopg2-binary
+django-bootstrap5
