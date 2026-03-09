@@ -1,18 +1,57 @@
 {% extends "frontend/base.html" %}
 {% load django_bootstrap5 %}
 
-{% block title %}Cadastrar Formulário{% endblock %}
+{% block title %}Questionário de estado{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <h1 class="mb-4">Cadastrar formulário</h1>
-        <p class="mb-4">Usuário: {{ request.user.username }} <a href="{% url 'logout' %}">(logout)</a></p>
-        <form method="POST" novalidate>
-            {% csrf_token %}
-            {% bootstrap_form form %}
-            <button class="btn btn-primary" type="submit">Enviar</button>
-        </form>
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card bg-secondary bg-opacity-3 border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h1 class="card-title mb-3">Questionário de estado</h1>
+                <p class="text-muted mb-4">Usuário: <strong>{{ request.user.username }}</strong> · <a href="{% url 'logout' %}">logout</a></p>
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <h5 class="mb-3">Como estou hoje?</h5>
+                        <div class="btn-group d-flex flex-wrap" role="group" aria-label="Estado">
+                            {% for radio in form.estado %}
+                                <input type="radio" class="btn-check" name="{{ radio.name }}" id="{{ radio.id_for_label }}" value="{{ radio.choice_value }}" {% if radio.choice_value == radio.data %}checked{% endif %} autocomplete="off">
+                                <label class="btn btn-outline-light flex-fill m-1" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="mb-3">O que está influenciando seu estado?</h5>
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2">
+                            {% for checkbox in form.influencias %}
+                                <div class="col">
+                                    <label class="btn btn-outline-light w-100 d-flex align-items-center justify-content-between py-2">
+                                        <span>{{ checkbox.choice_label }}</span>
+                                        {{ checkbox.tag }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 input-group input-group-lg">
+                        <span class="input-group-text bg-dark text-light">Descrição</span>
+                        {{ form.descricao }}
+                    </div>
+
+                    <div class="mb-3 input-group input-group-lg">
+                        <span class="input-group-text bg-dark text-light">Campo de Texto Livre</span>
+                        {{ form.texto_livre }}
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100" type="submit">Enviar</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

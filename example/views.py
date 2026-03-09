@@ -29,7 +29,12 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('index')
+            
+            # Redireciona para admin se for superuser, staff OU coordenador
+            if user.is_staff or user.is_superuser or hasattr(user, 'coordenador'):
+                return redirect('home_coordenador')
+            else:
+                return redirect('cadastrar_formulario')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})

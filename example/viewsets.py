@@ -1,6 +1,12 @@
 from rest_framework import viewsets, permissions
-from .models import User, Formulario
-from .serializers import UserSerializer, FormularioSerializer
+from .models import User, Formulario, UnidadeOrganizacional, Setor, Coordenador
+from .serializers import (
+    UserSerializer,
+    FormularioSerializer,
+    UnidadeOrganizacionalSerializer,
+    SetorSerializer,
+    CoordenadorSerializer,
+)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -11,6 +17,33 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class UnidadeOrganizacionalViewSet(viewsets.ModelViewSet):
+    queryset = UnidadeOrganizacional.objects.all()
+    serializer_class = UnidadeOrganizacionalSerializer
+
+    def get_permissions(self):
+        permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class SetorViewSet(viewsets.ModelViewSet):
+    queryset = Setor.objects.all()
+    serializer_class = SetorSerializer
+
+    def get_permissions(self):
+        permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class CoordenadorViewSet(viewsets.ModelViewSet):
+    queryset = Coordenador.objects.all()
+    serializer_class = CoordenadorSerializer
+
+    def get_permissions(self):
+        permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
 
