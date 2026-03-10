@@ -18,7 +18,6 @@ router.register(r'coordenadores', CoordenadorViewSet)
 router.register(r'formularios', FormularioViewSet)
 
 urlpatterns = [
-    path('', index, name='index'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('api/user/', user_profile, name='user_profile'),
