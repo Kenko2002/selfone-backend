@@ -1,4 +1,13 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-white border-end border-secondary" style="min-height: 100vh;">
+<!-- Botão para abrir sidebar no Mobile -->
+<div class="d-md-none p-3 bg-dark border-bottom border-secondary">
+    <button class="btn btn-outline-light w-100 d-flex align-items-center justify-content-between" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile">
+        <span><i class="bi bi-speedometer2 me-2"></i> Menu de Gestão</span>
+        <i class="bi bi-list fs-4"></i>
+    </button>
+</div>
+
+<!-- Sidebar Desktop -->
+<div class="d-none d-md-flex flex-column flex-shrink-0 p-3 bg-dark text-white border-end border-secondary" style="min-height: 100vh; position: sticky; top: 0;">
     <div class="mb-4 text-center">
         <h5 class="fw-bold text-white">Painel Gestão</h5>
         <hr class="border-secondary opacity-25">
@@ -6,14 +15,12 @@
     
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item mb-2">
-            <a href="{% url 'home_coordenador' %}" 
-               class="nav-link {% if request.resolver_match.url_name == 'home_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
+            <a href="{% url 'home_coordenador' %}" class="nav-link {% if request.resolver_match.url_name == 'home_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
                 <i class="bi bi-list-check me-2"></i> Lista de Formulários
             </a>
         </li>
         <li class="nav-item mb-2">
-            <a href="{% url 'dashboard_coordenador' %}" 
-               class="nav-link {% if request.resolver_match.url_name == 'dashboard_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
+            <a href="{% url 'dashboard_coordenador' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
                 <i class="bi bi-graph-up me-2"></i> Dashboard Gráficos
             </a>
         </li>
@@ -32,12 +39,12 @@
         {% endfor %}
     </div>
 
-    <hr class="border-secondary opacity-25">
+    <hr class="border-secondary opacity-25 mt-auto">
 
-    <div class="dropdown px-2">
+    <div class="px-2 pb-3">
         <div class="mb-3">
-            <div class="fw-bold text-white">{{ request.user.nome }}</div>
-            <div class="small text-secondary" style="font-size: 0.85rem;">{{ request.user.username }}</div>
+            <div class="fw-bold text-white">{{ request.user.username }}</div>
+            <div class="small text-secondary" style="font-size: 0.85rem;">Coordenador</div>
         </div>
         <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger w-100 border-0 bg-danger bg-opacity-10 text-danger">
             <i class="bi bi-box-arrow-right me-1"></i> Sair
@@ -45,10 +52,56 @@
     </div>
 </div>
 
+<!-- Sidebar Mobile (Offcanvas) -->
+<div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarMobile">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title fw-bold">Painel Gestão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item mb-2">
+                <a href="{% url 'home_coordenador' %}" class="nav-link {% if request.resolver_match.url_name == 'home_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
+                    <i class="bi bi-list-check me-2"></i> Lista de Formulários
+                </a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="{% url 'dashboard_coordenador' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_coordenador' %}active{% else %}text-white link-light opacity-75{% endif %}">
+                    <i class="bi bi-graph-up me-2"></i> Dashboard Gráficos
+                </a>
+            </li>
+        </ul>
+
+        <hr class="border-secondary opacity-25 shadow-sm">
+        
+        <div class="pb-3 px-2">
+            <div class="small fw-bold text-secondary mb-2 text-uppercase" style="font-size: 0.75rem;">Meus Setores</div>
+            {% for setor in request.user.coordenador.setores.all %}
+                <div class="badge bg-secondary bg-opacity-25 border border-secondary mb-1 d-block text-start p-2 fw-normal">
+                    <i class="bi bi-geo-alt small me-1"></i> {{ setor.nome }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr class="border-secondary opacity-25 mt-auto">
+
+        <div class="px-2 pb-3">
+            <div class="mb-3">
+                <div class="fw-bold text-white">{{ request.user.username }}</div>
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-danger w-100">
+                <i class="bi bi-box-arrow-right me-1"></i> Sair
+            </a>
+        </div>
+    </div>
+</div>
+
 <style>
     .nav-pills .nav-link:not(.active):hover {
         background-color: rgba(255, 255, 255, 0.1);
-        opacity: 1;
         color: #fff !important;
+    }
+    .nav-link.active {
+        background-color: #0d6efd !important;
     }
 </style>

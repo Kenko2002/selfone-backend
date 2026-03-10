@@ -50,3 +50,41 @@ h1, h2 {
 .alert {
   border-radius: 0.5rem;
 }
+
+.custom-btn-submit {
+    background-color: #002d5f; /* Azul Marinho Profundo */
+    border: 1px solid #003a7d;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.custom-btn-submit:hover {
+    background-color: #032141; /* Um tom ainda mais escuro para o hover */
+    border-color: #002d5f;
+    color: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(1, 2, 75, 0.5);
+}
+
+.custom-btn-submit:active {
+    transform: translateY(0);
+}
+
+
+.btn-azul-profundo {
+    /* Um azul marinho forte que não confunde com preto */
+    background-color: #003399 !important; 
+    border: 1px solid #0044cc !important;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-azul-profundo:hover {
+    /* No hover, ele fica um pouco mais claro para dar feedback */
+    background-color: #0044cc !important;
+    border-color: #0055ff !important;
+    box-shadow: 0 0 15px rgba(0, 51, 153, 0.5);
+    transform: translateY(-1px);
+}

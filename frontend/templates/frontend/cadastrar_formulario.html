@@ -4,54 +4,161 @@
 {% block title %}Questionário de estado{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<style>
+    /* 1. O CARD: Preto absoluto com bordas sutis */
+    .card-questionnaire {
+        background-color: #000000 !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    }
+
+    /* 2. O BOTÃO: Azul Cobalto (Escuro mas visível) */
+    .btn-finalizar {
+        background-color: #0047AB !important; /* Azul Cobalto */
+        border: 1px solid #0056b3 !important;
+        color: #ffffff !important;
+        padding: 1rem !important;
+        font-weight: bold !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease !important;
+    }
+
+    .btn-finalizar:hover {
+        background-color: #0056b3 !important; /* Um pouco mais claro no hover */
+        box-shadow: 0 0 20px rgba(0, 71, 171, 0.4) !important;
+        transform: translateY(-2px);
+    }
+
+    /* 3. OPÇÕES DE ESTADO (Rádios) */
+    .state-option .btn-check + .btn {
+        background: #111;
+        border-color: #333;
+        color: #888;
+        padding: 1rem;
+    }
+
+    .state-option .btn-check:checked + .btn {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
+        font-weight: bold;
+    }
+
+    /* 4. INFLUENCIAS (Checkboxes) */
+    .influence-option .btn-check + .btn {
+        background: #111;
+        border: 1px solid #222;
+        color: #eee;
+        text-align: left;
+    }
+
+    .influence-option .btn-check:checked + .btn {
+        background: rgba(0, 71, 171, 0.2) !important;
+        border-color: #0047AB !important;
+        color: #fff !important;
+    }
+
+    /* 5. INPUTS DE TEXTO */
+    .custom-textarea {
+        background: #111 !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+    }
+    
+    .custom-textarea:focus {
+        border-color: #0047AB !important;
+        box-shadow: 0 0 0 0.25rem rgba(0, 71, 171, 0.25) !important;
+    }
+
+    .text-label {
+        color: #666;
+        font-size: 0.75rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="row justify-content-center py-4">
     <div class="col-12 col-md-10 col-lg-8">
-        <div class="card bg-secondary bg-opacity-3 border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <h1 class="card-title mb-3">Questionário de estado</h1>
-                <p class="text-muted mb-4">Usuário: <strong>{{ request.user.username }}</strong> · <a href="{% url 'logout' %}">logout</a></p>
+        <div class="card card-questionnaire shadow-lg">
+            <div class="card-body p-4 p-md-5">
+                
+                <div class="mb-5">
+                    <h1 class="display-6 fw-bold text-white mb-2">Questionário de estado</h1>
+                    <p class="text-muted">
+                        Usuário: <span class="text-white">{{ request.user.username }}</span>
+                        · <a href="{% url 'logout' %}" class="text-danger text-decoration-none">Sair</a>
+                    </p>
+                </div>
 
                 <form method="POST" novalidate>
                     {% csrf_token %}
 
-                    <div class="mb-4">
-                        <h5 class="mb-3">Como estou hoje?</h5>
-                        <div class="btn-group d-flex flex-wrap" role="group" aria-label="Estado">
+                    <!-- Seção: Estado -->
+                    <div class="mb-5">
+                        <h5 class="text-white-50 mb-3 fw-light">Como estou hoje?</h5>
+                        <div class="row g-2">
                             {% for radio in form.estado %}
-                                <input type="radio" class="btn-check" name="{{ radio.name }}" id="{{ radio.id_for_label }}" value="{{ radio.choice_value }}" {% if radio.choice_value == radio.data %}checked{% endif %} autocomplete="off">
-                                <label class="btn btn-outline-light flex-fill m-1" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="mb-3">O que está influenciando seu estado?</h5>
-                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2">
-                            {% for checkbox in form.influencias %}
-                                <div class="col">
-                                    <label class="btn btn-outline-light w-100 d-flex align-items-center justify-content-between py-2">
-                                        <span>{{ checkbox.choice_label }}</span>
-                                        {{ checkbox.tag }}
+                                <div class="col-6 col-sm-4 state-option">
+                                    <input type="radio" class="btn-check" name="{{ radio.name }}" id="{{ radio.id_for_label }}" value="{{ radio.choice_value }}" {% if radio.choice_value == radio.data %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-light w-100" for="{{ radio.id_for_label }}">
+                                        {{ radio.choice_label }}
                                     </label>
                                 </div>
                             {% endfor %}
                         </div>
                     </div>
 
-                    <div class="mb-3 input-group input-group-lg">
-                        <span class="input-group-text bg-dark text-light">Descrição</span>
-                        {{ form.descricao }}
+                    <!-- Seção: Influências -->
+                    <div class="mb-5">
+                        <h5 class="text-white-50 mb-3 fw-light">O que está influenciando seu estado?</h5>
+                        <div class="row row-cols-1 row-cols-sm-2 g-2">
+                            {% for checkbox in form.influencias %}
+                                <div class="col influence-option">
+                                    <input type="checkbox" class="btn-check" name="{{ checkbox.name }}" id="{{ checkbox.id_for_label }}" value="{{ checkbox.choice_value }}" {% if checkbox.choice_value in form.influencias.value %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-light w-100 py-2" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
 
-                    <div class="mb-3 input-group input-group-lg">
-                        <span class="input-group-text bg-dark text-light">Campo de Texto Livre</span>
-                        {{ form.texto_livre }}
+                    <!-- Seção: Descrições -->
+                    <div class="mb-4">
+                        <div class="mb-4">
+                            <label class="text-label mb-2 uppercase">DESCRIÇÃO</label>
+                            {{ form.descricao }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-label mb-2 uppercase">TEXTO LIVRE</label>
+                            {{ form.texto_livre }}
+                        </div>
                     </div>
 
-                    <button class="btn btn-primary btn-lg w-100" type="submit">Enviar</button>
+                    <!-- BOTÃO FINAL -->
+                    <div class="pt-3">
+                        <button class="btn btn-lg w-100 btn-finalizar " type="submit">
+                            CONCLUIR QUESTIONÁRIO
+                        </button>
+                    </div>
                 </form>
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Garante que os campos do Django usem o estilo escuro
+    document.addEventListener("DOMContentLoaded", function() {
+        const fields = document.querySelectorAll('textarea, input[type="text"]');
+        fields.forEach(f => {
+            f.classList.add('form-control', 'custom-textarea');
+        });
+    });
+</script>
 {% endblock %}

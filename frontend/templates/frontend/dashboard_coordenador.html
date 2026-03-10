@@ -1,0 +1,147 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard Administrativo{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row g-0">
+        <!-- Sidebar Coluna -->
+        <div class="col-12 col-md-3 col-lg-2">
+            {% include "./componentes/sidebar_coordenador.html" %}
+        </div>
+
+        <!-- Conteúdo do Dashboard -->
+        <main class="col-12 col-md-9 col-lg-10 p-3 p-md-4">
+            <div class="mb-4">
+                <h2 class="fw-bold text-white">Monitoramento</h2>
+                <p class="text-secondary small">Filtros e indicadores em tempo real</p>
+            </div>
+
+            <!-- Card de Filtros Responsivo -->
+            <div class="card bg-dark border-secondary shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-secondary small fw-bold">PERÍODO</label>
+                            <select name="periodo" class="form-select bg-dark text-white border-secondary">
+                                <option value="7" {% if filtros.periodo == '7' %}selected{% endif %}>Últimos 7 dias</option>
+                                <option value="30" {% if filtros.periodo == '30' %}selected{% endif %}>Últimos 30 dias</option>
+                                <option value="" {% if not filtros.periodo %}selected{% endif %}>Todo período</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label text-secondary small fw-bold">DE:</label>
+                            <input type="date" name="data_inicio" class="form-control bg-dark text-white border-secondary" value="{{ filtros.data_inicio }}">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label text-secondary small fw-bold">ATÉ:</label>
+                            <input type="date" name="data_fim" class="form-control bg-dark text-white border-secondary" value="{{ filtros.data_fim }}">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">FILTRAR</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- KPIs (Cartões de Resumo) -->
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-sm-4">
+                    <div class="card bg-primary text-white border-0 shadow-sm">
+                        <div class="card-body py-4">
+                            <div class="text-white-50 small fw-bold text-uppercase">Total Geral</div>
+                            <h2 class="display-6 fw-bold mb-0">{{ total_formularios }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card bg-danger text-white border-0 shadow-sm">
+                        <div class="card-body py-4">
+                            <div class="text-white-50 small fw-bold text-uppercase">Críticos</div>
+                            <h2 class="display-6 fw-bold mb-0">{{ criticos }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <div class="card bg-success text-white border-0 shadow-sm">
+                        <div class="card-body py-4">
+                            <div class="text-white-50 small fw-bold text-uppercase">Hoje</div>
+                            <h2 class="display-6 fw-bold mb-0">{{ hoje }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="row g-3">
+                <div class="col-12 col-xl-5">
+                    <div class="card bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-white mb-4">Estado de Saúde</h5>
+                            <div style="position: relative; height:300px;">
+                                <canvas id="estadoChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-7">
+                    <div class="card bg-dark border-secondary h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-white mb-4">Fatores de Influência</h5>
+                            <div style="position: relative; height:300px;">
+                                <canvas id="influenceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Configurações comuns para responsividade
+    const commonOptions = {
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: '#aaa', font: { size: 12 } } }
+        }
+    };
+
+    // Gráfico Pizza
+    new Chart(document.getElementById('estadoChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ estado_labels|safe }},
+            datasets: [{
+                data: {{ estado_values|safe }},
+                backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#dc3545'],
+                borderWidth: 0
+            }]
+        },
+        options: commonOptions
+    });
+
+    // Gráfico Barras
+    new Chart(document.getElementById('influenceChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ influence_labels|safe }},
+            datasets: [{
+                label: 'Ocorrências',
+                data: {{ influence_values|safe }},
+                backgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: { ticks: { color: '#888' }, grid: { color: '#333' } },
+                x: { ticks: { color: '#888' }, grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

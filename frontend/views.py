@@ -8,6 +8,7 @@ from .forms import FormularioForm
 from example.models import Formulario
 from django.utils import timezone 
 from django.db.models import Count
+from datetime import timedelta
 # login screen
 
 def login_view(request):
@@ -60,6 +61,7 @@ def home_coordenador(request):
 
     return render(request, 'frontend/home_coordenador.html', {'formularios': formularios})
 
+
 def dashboard_coordenador(request):
     if not hasattr(request.user, 'coordenador'):
         return redirect('home_admin')
@@ -67,28 +69,38 @@ def dashboard_coordenador(request):
     coord = request.user.coordenador
     meus_setores = coord.setores.all()
     
-    # Filtro base: Apenas formulários de usuários dos setores deste coordenador
+    # --- LÓGICA DE FILTRO POR TEMPO ---
+    periodo = request.GET.get('periodo', '30') # Padrão 30 dias
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+
+    # Filtro base por setor
     formularios_queryset = Formulario.objects.filter(
         user__setor__in=meus_setores
     ).distinct()
 
-    # --- KPIs (Indicadores Rápidos) ---
+    # Aplica filtros de data
+    if data_inicio and data_fim:
+        formularios_queryset = formularios_queryset.filter(created_at__date__range=[data_inicio, data_fim])
+    elif periodo == '0': # Hoje
+        formularios_queryset = formularios_queryset.filter(created_at__date=timezone.now().date())
+    elif periodo:
+        dias = int(periodo)
+        data_limite = timezone.now() - timedelta(days=dias)
+        formularios_queryset = formularios_queryset.filter(created_at__gte=data_limite)
+
+    # --- KPIs ---
     total_formularios = formularios_queryset.count()
     criticos = formularios_queryset.filter(estado__in=['alerta', 'risco']).count()
-    hoje = formularios_queryset.filter(created_at__date=timezone.now().date()).count()
+    hoje_count = formularios_queryset.filter(created_at__date=timezone.now().date()).count()
 
-    # --- Gráfico de Estados (Pizza/Doughnut) ---
-    estado_counts = (
-        formularios_queryset.values('estado')
-        .annotate(count=Count('id'))
-    )
-    
-    # Mapear as siglas do banco para os nomes legíveis do TextChoices
+    # --- Gráfico de Estados ---
+    estado_counts = formularios_queryset.values('estado').annotate(count=Count('id'))
     choices_dict = dict(Formulario.Estado.choices)
     estado_labels = [choices_dict.get(item['estado'], item['estado']) for item in estado_counts]
     estado_values = [item['count'] for item in estado_counts]
 
-    # --- Gráfico de Influências (Barras) ---
+    # --- Gráfico de Influências ---
     influence_counter = {}
     for f in formularios_queryset:
         if isinstance(f.influencias, list):
@@ -103,14 +115,19 @@ def dashboard_coordenador(request):
         'setores': meus_setores,
         'total_formularios': total_formularios,
         'criticos': criticos,
-        'hoje': hoje,
+        'hoje': hoje_count,
         'estado_labels': json.dumps(estado_labels),
         'estado_values': json.dumps(estado_values),
         'influence_labels': json.dumps(influence_labels),
         'influence_values': json.dumps(influence_values),
+        # Passar os filtros atuais de volta para o template
+        'filtros': {
+            'periodo': periodo,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+        }
     }
-
-    return render(request, 'frontend/coordenador_dashboard.html', context)
+    return render(request, 'frontend/dashboard_coordenador.html', context)
 
 def cadastrar_formulario(request):
     if not request.user.is_authenticated:
